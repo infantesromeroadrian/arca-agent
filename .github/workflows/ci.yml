@@ -43,6 +43,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - name: CLI unit tests
+        run: |
+          uv run python -m unittest discover -s tests
+      - name: CLI help smoke
+        run: |
+          uv run create-arca --help
       # A PR that breaks the template must fail here, not in a user's install.
       - name: render smoke test (every profile renders, no stray variables)
         run: |
