@@ -1,11 +1,11 @@
 [project]
 name = "create-arca"
 version = "0.1.0"
-description = "Generate your own ARCA — a Claude Code agent orchestrated by 59 specialist subagents, skills, hooks and pipelines."
+description = "Generate your own ARCA harness for Claude Code, Codex CLI, or OpenCode."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-keywords = ["claude-code", "ai-agent", "orchestration", "subagents", "scaffolding", "copier"]
+keywords = ["claude-code", "codex", "opencode", "ai-agent", "orchestration", "subagents", "scaffolding", "copier"]
 
 # Copier drives the wizard + templating + `copier update`.
 dependencies = [
@@ -26,6 +26,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/create_arca"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"copier.yml" = "create_arca/template_src/copier.yml"
+"template" = "create_arca/template_src/template"
 
 [tool.ruff]
 line-length = 110

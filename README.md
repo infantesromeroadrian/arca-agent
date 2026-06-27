@@ -1,12 +1,12 @@
 # create-arca
 
-**Mint your own ARCA — a Claude Code agent orchestrated by 59 specialist subagents, 145 skills, enforced gates and full ML/security/infra pipelines — in one command.**
+**Mint your own ARCA harness for Claude Code, Codex CLI, or OpenCode in one command.**
 
 ```bash
 uvx create-arca
 ```
 
-That's it. Answer a handful of questions and you get a complete, opinionated Claude Code harness wired into `~/.claude`: a routing orchestrator, a roster of domain specialists, adversarial critic gates that block bad work *before* it lands, and a personality that never approves on the first pass.
+Default runtime is Claude Code. Use `--runtime codex` or `--runtime opencode` to render the same ARCA identity, agents, skills and commands into the layout each tool actually discovers.
 
 ---
 
@@ -15,7 +15,8 @@ That's it. Answer a handful of questions and you get a complete, opinionated Cla
 Most "AI agents" are one big prompt. ARCA is a **system**: a main loop that does not execute domain work itself — it *routes* every task to the right specialist, runs it through blocking quality gates, and refuses to ship until the work is right.
 
 - **59 specialist subagents** — ML, deep learning, RL, data, MLOps, RAG, cloud, Kubernetes, security/red-team, frontend, and the critics that police them.
-- **Hard gates that actually block** — code-critic, math-critic, secret detection, conventional-commit enforcement, delegation preflight. These are real hooks, not vibes.
+- **Runtime-native layout** — Claude gets `CLAUDE.md`, `agents/`, `commands/`, `skills/`; Codex gets `AGENTS.md`, `config.toml`, `.agents/codex-agents/`, `.agents/skills/`, `prompts/`; OpenCode gets `AGENTS.md`, `opencode.json`, `.opencode/{agents,commands,skills}`.
+- **Guardrails where the runtime supports them** — Claude keeps the full hook harness; Codex gets a base `config.toml` with destructive-command, commit and secret gates; OpenCode gets the portable agent/command/skill surface and a secret-free config.
 - **Three pipelines** — a 14-cycle ML lifecycle, a CVE-first HTB/CTF flow, and a 9-phase AI red-team pipeline.
 - **A character** — ARCA is a severe architect: dry, demanding, allergic to AI slop. You can keep that voice or dial it to "professional" — but it speaks as *you*, to *you*.
 
@@ -25,11 +26,25 @@ Most "AI agents" are one big prompt. ARCA is a **system**: a main loop that does
 # Render ARCA into ~/.claude (the default)
 uvx create-arca
 
+# Render ARCA into ~/.codex
+uvx create-arca --runtime codex
+
+# Render ARCA into ~/.config/opencode
+uvx create-arca --runtime opencode
+
 # ...or into a specific directory
-uvx create-arca ./my-arca
+uvx create-arca --runtime codex ./my-arca-codex
 ```
 
-The wizard asks for your name, how the agent should address you, which model tiers you have, and **which domains you want** — so a data scientist doesn't get handed 14 penetration-testing agents.
+The wizard asks for your name, how the agent should address you, machine context, and **which domains you want** — so a data scientist doesn't get handed 14 penetration-testing agents.
+
+## Runtime Outputs
+
+| Runtime | Default destination | Main files |
+|---|---|---|
+| Claude Code | `~/.claude` | `CLAUDE.md`, `settings.json`, `agents/`, `commands/`, `skills/`, `hooks/` |
+| Codex CLI | `~/.codex` | `AGENTS.md`, `config.toml`, `.agents/codex-agents/*.toml`, `.agents/skills/`, `prompts/`, `scripts/codex-hooks/` |
+| OpenCode | `~/.config/opencode` | `AGENTS.md`, `opencode.json`, `.opencode/agents/`, `.opencode/commands/`, `.opencode/skills/`, `hooks/` |
 
 ## Profiles — install only what you need
 
@@ -44,17 +59,17 @@ The wizard asks for your name, how the agent should address you, which model tie
 
 ## It's a living harness, not a one-shot scaffold
 
-ARCA is shipped as a [Copier](https://copier.readthedocs.io) template. When a new ARCA release lands, pull it into your existing install **without losing your customization**:
+ARCA is shipped as a [Copier](https://copier.readthedocs.io) template. Claude uses the template layout directly, so `copier update` works there:
 
 ```bash
 copier update
 ```
 
-Your name, your tone, your profile — all preserved. You ride upstream improvements like a dependency, not a fork.
+Codex and OpenCode use a CLI adaptation step after Copier render. For those runtimes, re-run `create-arca --runtime <runtime> <destination>` until runtime-native update support is promoted. Your answers are still rendered by Copier; the final directory layout is adapted by the CLI.
 
 ## How it works
 
-`create-arca` renders a [Copier](https://copier.readthedocs.io) template (`template/`) into your `~/.claude`. Every personal detail is a variable, so you install *ARCA-the-architect* but the harness knows *you*. The hard gates work out of the box; the optional local LLM-as-judge (Ollama) powers the softer advisory gates if you enable it.
+`create-arca` renders a [Copier](https://copier.readthedocs.io) template (`template/`) with your answers. Claude receives that layout directly. Codex/OpenCode render into a temporary staging directory first, then the CLI maps the common ARCA content into runtime-native folders. Every personal detail is a variable, so you install *ARCA-the-architect* but the harness knows *you*.
 
 ## Security
 

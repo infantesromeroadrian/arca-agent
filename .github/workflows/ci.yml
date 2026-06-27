@@ -49,11 +49,29 @@ jobs:
       - name: CLI help smoke
         run: |
           uv run create-arca --help
-      # A PR that breaks the template must fail here, not in a user's install.
-      - name: render smoke test (every profile renders, no stray variables)
+      # A PR that breaks any supported runtime layout must fail here, not in a user's install.
+      - name: render smoke test (Claude, Codex, OpenCode)
         run: |
-          uvx --from copier copier copy --defaults -d profile=all -d user_name="CI User" . /tmp/out
-          test -f /tmp/out/CLAUDE.md
-          if grep -rIo '⟦[^⟧]*⟧' /tmp/out; then
+          uv run create-arca --defaults -d profile=all -d user_name="CI User" --runtime claude /tmp/out-claude
+          test -f /tmp/out-claude/CLAUDE.md
+          test -f /tmp/out-claude/settings.json
+          test -f /tmp/out-claude/agents/code-critic.md
+          test -f /tmp/out-claude/skills/git/SKILL.md
+
+          uv run create-arca --defaults -d profile=core -d user_name="CI User" --runtime codex /tmp/out-codex
+          test -f /tmp/out-codex/AGENTS.md
+          test -f /tmp/out-codex/config.toml
+          test -f /tmp/out-codex/.agents/codex-agents/code_critic.toml
+          test -f /tmp/out-codex/.agents/skills/git/SKILL.md
+          test -f /tmp/out-codex/prompts/commit.md
+
+          uv run create-arca --defaults -d profile=core -d user_name="CI User" --runtime opencode /tmp/out-opencode
+          test -f /tmp/out-opencode/AGENTS.md
+          test -f /tmp/out-opencode/opencode.json
+          test -f /tmp/out-opencode/.opencode/agents/code-critic.md
+          test -f /tmp/out-opencode/.opencode/skills/git/SKILL.md
+          test -f /tmp/out-opencode/.opencode/commands/commit.md
+
+          if grep -rIo '⟦[^⟧]*⟧' /tmp/out-claude /tmp/out-codex /tmp/out-opencode; then
             echo "::error::Unrendered Copier variable left in output"; exit 1
           fi
